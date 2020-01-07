@@ -130,10 +130,12 @@ export default class Repository extends EventEmitter implements EventEmitter {
                 }
 
                 if (!(res.statusCode >= 200 && res.statusCode < 300)) {
-                    return this.emit(
-                        'error',
-                        new Error(`Response was not statusCode 2XX, but was ${res.statusCode}`),
-                    );
+                    let msg = `Response was not statusCode 2XX, but was ${res.statusCode}`;
+                    if (res.body) {
+                        // If the response has a body, we want it for logging.
+                        msg += `: ${res.body}`;
+                    }
+                    return this.emit('error', new Error(msg));
                 }
 
                 try {

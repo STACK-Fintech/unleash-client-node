@@ -219,9 +219,33 @@ test.cb('should handle 404 request error and emit error event', t => {
         StorageImpl: MockStorage,
     });
 
-    repo.on('error', err => {
+    repo.once('error', err => {
         t.truthy(err);
         t.true(err.message.startsWith('Response was not statusCode 2'));
+        t.end();
+    });
+});
+
+test.cb('should handle 504 request error and emit error event', t => {
+    const url = 'http://unleash-test-6.app';
+    nock(url)
+        .persist()
+        .get('/client/features')
+        .reply(504, 'jkl');
+
+    const repo = new Repository({
+        backupPath: 'foo',
+        url,
+        appName,
+        instanceId,
+        refreshInterval: 0,
+        StorageImpl: MockStorage,
+    });
+
+    repo.once('error', err => {
+        t.truthy(err);
+        t.true(err.message.startsWith('Response was not statusCode 2'));
+        t.true(err.message.endsWith(': jkl'));
         t.end();
     });
 });
